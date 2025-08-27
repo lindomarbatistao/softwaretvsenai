@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <title>Conteúdo da TV</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    html, body { margin:0; height:100%; background:#000; }
+    #wrap { display:flex; align-items:center; justify-content:center; height:100%; }
+    img { max-width:100%; max-height:100%; object-fit:contain; }
+    #msg { color:#fff; font:16px/1.4 system-ui, sans-serif; text-align:center; }
+  </style>
+</head>
+<body>
+  <div id="wrap">
+    <img id="imgConteudo" alt="conteúdo" style="display:none" />
+    <div id="msg"></div>
+  </div>
+
+  <script>
+    (async () => {
+      const host = window.location.hostname;
+      const urlServer = `http://${host}:3001`;           // backend (onde estão as imagens e a API)
+      const params = new URLSearchParams(location.search);
+      const tvId = params.get('id');
+
+      const elImg = document.getElementById('imgConteudo');
+      const elMsg = document.getElementById('msg');
+
+      function showMsg(txt) {
+        elImg.style.display = 'none';
+        elMsg.textContent = txt;
+      }
+
+      if (!tvId) { showMsg('ID da TV não informado (?id=...)'); return; }
+
+      try {
+        const res = await fetch(`${urlServer}/api/conteudo/listar/${tvId}`, { headers: { 'Accept':'application/json' } });
+        const text = await res.text();
+        if (!res.ok) throw new Error(`HTTP ${res.status} - ${text}`);
+        if (!text.trim()) { showMsg('Sem conteúdo para esta TV.'); return; }
+
+        // Algumas versões antigas retornavam 202 com texto; nas novas é JSON []
+        let data;
+        try { data = JSON.parse(text); } catch { throw new Error('Resposta não-JSON da API.'); }
+        if (!Array.isArray(data) || data.length === 0) { showMsg('Sem conteúdo ativo para esta TV.'); return; }
+
+        // Slideshow básico usando o campo "tempo" (segundos)
+        let i = 0;
+        const itens = data.map(x => ({
+          src: `${urlServer}/conteudo/${x.imagem}`,
+          tempo: Math.max(1, Number(x.tempo) || 10)   // fallback 10s
+        }));
+
+        async function trocar() {
+          const item = itens[i];
+          elImg.src = item.src;
+          elImg.onload = () => { elMsg.textContent = ''; elImg.style.display = 'block'; };
+          elImg.onerror = () => { elImg.style.display = 'none'; elMsg.textContent = 'Falha ao carregar imagem.'; };
+          i = (i + 1) % itens.length;
+          setTimeout(trocar, item.tempo * 1000);
+        }
+        trocar();
+      } catch (e) {
+        console.error(e);
+        showMsg('Falha ao carregar: ' + String(e));
+      }
+    })();
+  </script>
+</body>
+</html>
+

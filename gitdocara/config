@@ -1,0 +1,13 @@
+[core]
+	repositoryformatversion = 0
+	filemode = false
+	bare = false
+	logallrefupdates = true
+	symlinks = false
+	ignorecase = true
+[remote "senaitv"]
+	url = https://github.com/douglasgaspar/senaitv.git
+	fetch = +refs/heads/*:refs/remotes/senaitv/*
+[branch "main"]
+	remote = senaitv
+	merge = refs/heads/main

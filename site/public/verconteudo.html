@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script type="text/javascript" src="jquery.min.js"></script>
+    <script type="text/javascript" src="jquery.cycle.all.js"></script>
+    <script type="text/javascript" src="jquery.easing.1.3.js"></script>
+
+    <link href="cycle.css" rel="stylesheet" />
+
+    <script type="">
+        $(document).ready(function(){
+            //Para atualizar a cada 1h
+            setInterval(() => {
+                window.location.reload(true);
+            }, 60 * 60000);
+            
+            const parametrosURL = new URLSearchParams(window.location.search)
+            const id = parametrosURL.get("id")
+
+            $.get( "http://10.109.68.121:3001/api/conteudo/listar/" + id, function( data ) {
+                console.log(data);
+
+                if(data.result == "Vazio"){
+                    $("#semImagem").css("display", "block");
+                }else{
+                    data.forEach((data) => {
+                    console.log(data);
+                    $("#slideshow").append("<img data-duration='" + data.tempo + "' src='conteudo/" + data.imagem  + "'/>");
+                    //$("#mensagem").append("<a>" + data.mensagem + "</a>");
+                });
+                    // $("#slideshow")
+                    //     .append( "Name: " + data.name ) // John
+                    //     .append( "Time: " + data.time ); //  2pm   
+                }
+                }, "json" )
+                .done(function() {
+                    $('.pics ').cycle({ 
+                        fx:     'fade', 
+                        speed:  'fast',
+                        width:  'fit',
+                        fit:  1,
+                        height:  'fit',
+                        timeoutFn: function(curr, next, opts, fwd) {
+                            return parseInt($(opts.elements[opts.currSlide]).attr("data-duration")) * 1000;
+                        },
+                        after: function(curr,next,opts) {
+                            var index=opts.currSlide;
+                            $('#mensagem').show();
+                            $('#mensagem').eq(index).hide();
+                        }
+                    });
+                });
+        });
+    </script>
+</head>
+
+<body>
+    <div class="full" id="imagens">
+        <div id="semImagem" class="semImagem">Sem imagem cadastrada para essa TV</div>
+        <div id="slideshow" class="pics"></div>
+        <!-- <div class="mensagem" id="mensagem"></div> -->
+    </div>
+</body>
+
+</html>
