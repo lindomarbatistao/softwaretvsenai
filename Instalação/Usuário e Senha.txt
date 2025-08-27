@@ -1,0 +1,5 @@
+{
+"nome":"senai501",
+"usuário":"senai@501.com",
+"senha":"asdf@mange"
+}

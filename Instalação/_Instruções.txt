@@ -1,0 +1,9 @@
+Acesse os PDFs que estão numerados na sequência dos procedimentos que devem ser feitos.
+
+
+Se precisar, seguem dados de acesso administrador para o usuário do Windows e Banco de Dados.
+
+Usuário VM: divulga
+Senha: TV@2023
+
+MySQL: MySQL@2023
